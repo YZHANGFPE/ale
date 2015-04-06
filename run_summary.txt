@@ -1,0 +1,5 @@
+Player Agent: ram_agent
+Game: asterix.bin
+Number of Frames: 7822175
+Number of Episodes: 10001
+Average Reward on last 1800000 frames: 0.334583
