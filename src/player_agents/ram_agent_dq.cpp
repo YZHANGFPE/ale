@@ -28,9 +28,12 @@ RAMAgentDQ::RAMAgentDQ(GameSettings* _game_settings, OSystem* _osystem) :
 	cout << "Full Feature-Vector Length: " << i_full_feature_vec_length << endl;
 	p_ql_lambda_solver = RLQlLambda::generate_rl_ql_lambda_instance(
 						p_osystem, i_full_feature_vec_length, i_num_actions);
-
     pv_curr_feature_map  = new FeatureMap();
+    pv_prev_features_map = new FeatureMap();
     pv_num_nonzero_in_f = new IntVect();
+    pv_num_nonzero_in_f_prev = new IntVect();
+    pv_model = new EleVect();
+
     for (int i = 0; i < i_num_actions; i++) {
         IntArr feature_vec = IntArr(-1, i_base_length);
         pv_curr_feature_map->push_back(feature_vec);
@@ -44,12 +47,17 @@ RAMAgentDQ::RAMAgentDQ(GameSettings* _game_settings, OSystem* _osystem) :
 
 	b_end_episode_with_reward = p_osystem->settings().getBool(
 											"end_episode_with_reward", true);
+
 }
 
 RAMAgentDQ::~RAMAgentDQ() {
+    cout << "Model size is: "<< pv_model->size() << endl; 
     delete p_ql_lambda_solver;
     delete pv_curr_feature_map;
+    delete pv_prev_features_map;
     delete pv_num_nonzero_in_f;
+    delete pv_num_nonzero_in_f_prev;
+    delete pv_model;
     delete pv_tmp_fv_first_part;
     delete pv_subvector_positions;
 

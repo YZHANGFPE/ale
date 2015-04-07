@@ -24,6 +24,7 @@
 #include "export_tools.h"
 #include "random_tools.h"
 
+
 /* *********************************************************************
     Constructor
  ******************************************************************** */
@@ -126,14 +127,22 @@ int RLQlLambda::episode_start(   FeatureMap* new_feature_map,
                                     IntVect* num_nonzero_in_f, 
 									int forced_action_ind) {
     DecayTraces(0.0); 
+    pv_prev_features_map = new FeatureMap();
+    pv_num_nonzero_in_f_prev = new IntVect();
+    pv_model = new EleVect();
     pv_curr_features_map = new_feature_map;
+    *pv_prev_features_map = *new_feature_map;
     pv_num_nonzero_in_f = num_nonzero_in_f;
+    *pv_num_nonzero_in_f_prev = *num_nonzero_in_f;
+
+
     computeActionValues(); 
 	if (forced_action_ind == -1) {	
 		i_prev_action = selectEpsilonGreedyAction();
 	} else {
 		i_prev_action = forced_action_ind;
 	}
+    \
 	return i_prev_action;
 }
 
@@ -153,11 +162,32 @@ int RLQlLambda::episode_start(   FeatureMap* new_feature_map,
 int RLQlLambda::episode_step(FeatureMap* new_feature_map, 
                                 IntVect* num_nonzero_in_f, float new_reward, 
 								int forced_action_ind) {
+
     i_frame_counter++;
 	assert(i_prev_action != -1);
 	double delta = new_reward - v_Q[i_prev_action];	
 	pv_curr_features_map = new_feature_map;
     pv_num_nonzero_in_f =  num_nonzero_in_f;
+    // record model
+    element e;
+    //e.prev_fm = new FeatureMap;
+    //*(e.prev_fm) = *pv_prev_features_map;
+    //e.curr_fm = new FeatureMap;
+    e.curr_fm = *pv_curr_features_map;
+    //e.nnif_prev = new IntVect;
+    e.nnif_prev = *pv_num_nonzero_in_f_prev;
+    //e.nnif_curr = new IntVect;
+    e.nnif_curr = *pv_num_nonzero_in_f;
+    e.action = i_prev_action;
+    e.reward = new_reward;
+    pv_model->push_back(e);
+    cout << pv_model->size() << endl;
+    
+
+    // update prev feature map and none zero vector
+    *pv_prev_features_map = *pv_curr_features_map;
+    *pv_num_nonzero_in_f_prev = *pv_num_nonzero_in_f;
+
 	computeActionValues();		 //new action values based on new observation
 	if (forced_action_ind == -1) {	
 		i_prev_action = selectEpsilonGreedyAction();
@@ -174,6 +204,33 @@ int RLQlLambda::episode_step(FeatureMap* new_feature_map,
     updateTraces();	
     computeActionValues(i_prev_action);
 	return i_prev_action;
+}
+
+/* *********************************************************************
+    randomly select previsously experienced state action and update the 
+    weight 
+ * ****************************************************************** */
+void RLQlLambda::episode_plan() {
+    int s = pv_model->size();
+    int i = (int)(drand48()*(s-1));
+    element* e = &(*pv_model)[i];
+    FeatureMap f_prev = e->prev_fm;
+    FeatureMap f_curr = e->curr_fm;
+    IntVect nnif_prev = e->nnif_prev;
+    IntVect nnif_curr = e->nnif_curr;
+    float reward = e->reward;
+    int action = e->action;
+    FloatVect Q_old = computeActionValuesPlan(&f_prev, &nnif_prev);
+    double delta = reward - Q_old[action];
+    FloatVect Q_new = computeActionValuesPlan(&f_curr, &nnif_curr);
+    delta += (f_gamma * max(Q_new)); 
+    if (!(delta - 1.0 < delta)) {
+        cout << "Delta = inf.:(" << endl;
+        cerr << "Delta = inf. :(" << endl;
+        exit(-1);
+    }
+    updateWeights(delta);
+
 }
     
  
@@ -208,6 +265,9 @@ void RLQlLambda::episode_end(float reward, float value_of_final_state) {
         export_weights(filename.str());
         cout << "done." << endl;
     }
+    delete pv_prev_features_map;
+    delete pv_num_nonzero_in_f_prev;
+    delete pv_model;
 }
 
 /* *********************************************************************
@@ -223,6 +283,26 @@ void RLQlLambda::computeActionValues() {
 			v_Q[a] = v_Q[a] / float((*pv_num_nonzero_in_f)[a]);
 		}
 	}
+}
+
+/* *********************************************************************
+   Compute all the action values in epsiode_plan
+ * ****************************************************************** */
+FloatVect RLQlLambda::computeActionValuesPlan(FeatureMap* fm, IntVect* num_nonzero_in_f){
+    FloatVect Q (i_num_actions);
+
+    for (int a = 0; a < i_num_actions; a++) {
+        Q[a] = 0;
+        for (int j = 0; j < (*num_nonzero_in_f)[a]; j++) {
+            Q[a] += (*pv_weights)[(*fm)[a][j]];
+        }
+        if (b_normalize_fv) {
+            Q[a] = Q[a] / float((*num_nonzero_in_f)[a]);
+        }
+    }
+
+    return Q;
+
 }
 
 /* *********************************************************************

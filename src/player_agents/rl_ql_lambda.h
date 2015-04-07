@@ -55,6 +55,13 @@ class RLQlLambda {
         virtual int episode_step(   FeatureMap* new_feature_map, 
                             IntVect* num_nonzero_in_f, float new_reward, 
 							int forced_action_ind = -1);
+
+
+        /* *********************************************************************
+            randomly select previsously experienced state action and update the 
+            weight
+         * ****************************************************************** */
+        virtual void episode_plan();
          
         /* *********************************************************************
              This is called when  the episode ends. We manually insert the given
@@ -100,7 +107,12 @@ class RLQlLambda {
         /* *********************************************************************
            Compute all the action values from current activeFeatures and weights
          * ****************************************************************** */
-        virtual void computeActionValues();                         
+        virtual void computeActionValues();
+
+        /* *********************************************************************
+           Compute all the action values in epsiode_plan
+         * ****************************************************************** */
+        virtual FloatVect computeActionValuesPlan(FeatureMap* fm, IntVect* num_nonzero_in_f);                          
 
         /* *********************************************************************
             Compute a particular action value from current activeFeatures and 
@@ -192,8 +204,13 @@ class RLQlLambda {
         FeatureMap* pv_curr_features_map;  // a map from action number to a 
                                   // vector of active feature indecies for the 
                                   // current time step (s')
+        FeatureMap* pv_prev_features_map;  // a map from action number to a 
+                                  // vector of active feature indecies for the 
+                                  // previous time step 
         IntVect* pv_num_nonzero_in_f;  // Number of non-zero values in the 
                                   // featur-vector, corresponding to each action
+        IntVect* pv_num_nonzero_in_f_prev;  // Number of non-zero values in the 
+                                  // featur-vector, corresponding to each action for previous feature map
         int i_episode_counter;    // Counts the number of episodes we have seen
 		int i_frame_counter;	  // Counts the number of frames we have seen
 		int i_shrink_weights_frq; // How often to remove the smallest value in 
@@ -222,6 +239,17 @@ class RLQlLambda {
         double f_minimum_trace;    // Minimum non-zero value in v_traces
         IntVect* pv_nonzero_traces_ind;//Indecies of non-zero values in v_traces
         IntVect* pv_nonzero_traces_inv_ind; // inverse of pv_nonzero_traces_ind
+
+        struct element{
+            FeatureMap curr_fm;
+            FeatureMap prev_fm;
+            IntVect nnif_curr;
+            IntVect nnif_prev;
+            int reward;
+            int action;
+        };
+        typedef vector< element > EleVect;
+        EleVect* pv_model;
         
         
         

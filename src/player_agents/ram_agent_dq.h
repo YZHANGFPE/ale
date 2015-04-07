@@ -97,7 +97,9 @@ class RAMAgentDQ : public PlayerAgent {
         virtual Action on_start_of_game(void);
 
         FeatureMap* pv_curr_feature_map;
+        FeatureMap* pv_prev_features_map;
         IntVect* pv_num_nonzero_in_f;
+        IntVect* pv_num_nonzero_in_f_prev;
         RLQlLambda* p_ql_lambda_solver;
         IntArr* pv_tmp_fv_first_part;
         int i_ram_bits_length;
@@ -106,6 +108,19 @@ class RAMAgentDQ : public PlayerAgent {
         float f_alpha_multiplier;
         IntVect* pv_subvector_positions;
 		bool b_end_episode_with_reward;
+
+        struct element{
+            FeatureMap curr_fm;
+            FeatureMap prev_fm;
+            IntVect nnif_curr;
+            IntVect nnif_prev;
+            int reward;
+            int action;
+        };
+        typedef vector< element > EleVect;
+        EleVect* pv_model;
+
+        
 };
 
 #endif

@@ -244,6 +244,7 @@ Action PlayerAgent::agent_step( const IntMatrix* screen_matrix,
             break;
         case START_EPISODE: {
             // We Are about to start a new episode
+
             if (i_init_act_explor_count > 0 && 
 				i_curr_expl_act_index < i_num_actions) {
 				e_episode_status = ACTION_EXPLOR;
@@ -255,10 +256,12 @@ Action PlayerAgent::agent_step( const IntMatrix* screen_matrix,
 			} else {
 				e_episode_status = AGENT_ACTING;
 			}
+
             return on_start_of_game();
             break;
         }
 		case ACTION_EXPLOR:
+			cout << "I am starting 3" << endl;
 			// We are trying each action for a number of frames
 			if (i_curr_act_frame_count == 0) {
 				// Goto the next action
@@ -280,6 +283,7 @@ Action PlayerAgent::agent_step( const IntMatrix* screen_matrix,
 			// game.
 			
         case AGENT_ACTING: {
+        	
             // We are acting in the word.
             // See if the game has eneded, and if so, restart the game
             bool game_ended = p_game_settings->is_end_of_game(screen_matrix,  
@@ -411,7 +415,7 @@ PlayerAgent* PlayerAgent::generate_agent_instance(
         new_agent = new RAMAgentQL(_game_settings, _osystem);
     } else if (player_agent == "ram_agent_dq") {
         cout << "Game will be controlled by RAM Agent (DynaQ)" << endl;
-        new_agent = new RAMAgentQL(_game_settings, _osystem);
+        new_agent = new RAMAgentDQ(_game_settings, _osystem);
     } else if (player_agent == "class_agent") {
         cout << "Game will be controlled by Class Agent" << endl;
         new_agent = new ClassAgent(_game_settings, _osystem);
