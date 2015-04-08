@@ -5,9 +5,14 @@ MODULE_OBJS := \
 	src/player_agents/player_agent.o \
 	src/player_agents/random_agent.o \
 	src/player_agents/rl_sarsa_lambda.o \
+	src/player_agents/rl_ql_lambda.o \
+	src/player_agents/rl_cb_lambda.o \
 	src/player_agents/tiles2.o \
 	src/player_agents/mountain_car_test.o \
 	src/player_agents/ram_agent.o \
+	src/player_agents/ram_agent_ql.o \
+	src/player_agents/ram_agent_dq.o \
+	src/player_agents/ram_agent_cb.o \
 	src/player_agents/class_agent.o \
 	src/player_agents/blob_object.o \
 	src/player_agents/class_shape.o \

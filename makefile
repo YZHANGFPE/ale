@@ -48,7 +48,7 @@ HAVE_GCC3 = 1
 HAVE_NASM = 1
 
 INCLUDES += -Isrc/emucore -Isrc/emucore/m6502/src -Isrc/emucore/m6502/src/bspf/src -Isrc/common -Isrc/control -Isrc/player_agents -I/usr/include/ -I/usr/include/c++/4.3 -I/usr/include/c++/4.3/i486-linux-gnu/ -I/usr/include/c++/4.3/backward -I/usr/include
-OBJS += src/player_agents/ram_agent_ql.o src/player_agents/ram_agent_dq.o src/player_agents/rl_ql_lambda.o 
+OBJS += 
 DEFINES +=  -DUNIX -DHAS_ALTIVEC -DUSE_NASM -DBSPF_UNIX -DHAVE_INTTYPES -DWINDOWED_SUPPORT  -DHAVE_GETTIMEOFDAY -DSNAPSHOT_SUPPORT 
 LDFLAGS += 
 

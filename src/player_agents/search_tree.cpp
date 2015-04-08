@@ -88,6 +88,38 @@ Action SearchTree::get_best_action(void) {
 	return best_act;
 }
 
+/* *********************************************************************
+    Returns the best action index based on the expanded search tree
+ ******************************************************************* */
+int SearchTree::get_best_action_index(void){
+    cout << "I am in it" << endl;
+	assert (p_root != NULL);
+	int best_branch = p_root->i_best_branch;
+	TreeNode* best_child = p_root->v_children[best_branch];
+	assert(best_branch != -1);
+	vector<int> best_branches;
+	best_branches.push_back(best_branch);
+	for (unsigned int c = 0; c < p_root->v_children.size(); c++) {
+		TreeNode* curr_child = p_root->v_children[c];
+		if (c != best_branch && 
+			curr_child->f_branch_reward == best_child->f_branch_reward  && 
+			curr_child->b_is_dead == best_child->b_is_dead) {
+			best_branches.push_back(c);
+		}
+	}
+	if (best_branches.size() > 1) {
+		// when we have more than one best-branch, pick one randomly
+		cout << "randomly choosing a branch among " 
+			 << best_branches.size() << " branches: " 
+			 << "was: " << best_branch << " - ";
+		best_branch = choice(&best_branches);
+		cout << "is now: " << best_branch << endl;
+	}
+	cout<< "best_branch: "<< best_branch;
+	return best_branch;
+}
+
+
 
 /* *********************************************************************
 	Moves the best sub-branch of the root to be the new root of the tree

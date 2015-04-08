@@ -7,7 +7,7 @@
  * Copyright (c) 1995-2007 by Bradford W. Mott and the Stella team
  *
  * *****************************************************************************
- *  rl_ql_lambda.cpp
+ *  rl_cb_lambda.cpp
  *
  *  The implementation of a generic Gradient Descent Q-learning(lambda) solver.
  *  This can be plugged in various problems.
@@ -19,7 +19,7 @@
 #include <sstream>
 // #include <math.h>
 #include "vector_matrix_tools.h"
-#include "rl_ql_lambda.h"
+#include "rl_cb_lambda.h"
 #include "OSystem.hxx"
 #include "export_tools.h"
 #include "random_tools.h"
@@ -28,7 +28,7 @@
 /* *********************************************************************
     Constructor
  ******************************************************************** */
-RLQlLambda::RLQlLambda(   OSystem* _osystem, int feature_vec_size, 
+RLCBLambda::RLCBLambda(   OSystem* _osystem, int feature_vec_size, 
                                 int num_actions, float alpha, 
                                 int save_weights_freq) {
     p_osystem = _osystem;
@@ -111,7 +111,7 @@ RLQlLambda::RLQlLambda(   OSystem* _osystem, int feature_vec_size,
 /* *********************************************************************
     Deconstructor
  ******************************************************************** */
-RLQlLambda::~RLQlLambda() {
+RLCBLambda::~RLCBLambda() {
     delete pv_weights;
     delete pv_traces;
     delete pv_nonzero_traces_ind;
@@ -123,7 +123,7 @@ RLQlLambda::~RLQlLambda() {
 	 When forced_action_ind is not -1, we will choose the given action 
 	 instead of choosing one based on epsilon-greedy
  * ****************************************************************** */
-int RLQlLambda::episode_start(   FeatureMap* new_feature_map, 
+int RLCBLambda::episode_start(   FeatureMap* new_feature_map, 
                                     IntVect* num_nonzero_in_f, 
 									int forced_action_ind) {
     DecayTraces(0.0); 
@@ -159,7 +159,7 @@ int RLQlLambda::episode_start(   FeatureMap* new_feature_map,
     // deleting a vector is ratehr expensive). Therefore, do not assume
     // that pv_curr_features_map is different from new_feature_map. 
  * ****************************************************************** */
-int RLQlLambda::episode_step(FeatureMap* new_feature_map, 
+int RLCBLambda::episode_step(FeatureMap* new_feature_map, 
                                 IntVect* num_nonzero_in_f, float new_reward, 
 								int forced_action_ind) {
 
@@ -185,7 +185,9 @@ int RLQlLambda::episode_step(FeatureMap* new_feature_map,
 
 	computeActionValues();		 //new action values based on new observation
 	if (forced_action_ind == -1) {	
-		i_prev_action = selectEpsilonGreedyAction();
+		/*i_prev_action = search_agent->agent_step_cb(screen_matrix, console_ram,
+                                                    frame_number);*/
+        i_prev_action = selectEpsilonGreedyAction();
 	} else {
 		i_prev_action = forced_action_ind;
 	}
@@ -205,7 +207,7 @@ int RLQlLambda::episode_step(FeatureMap* new_feature_map,
     randomly select previsously experienced state action and update the 
     weight 
  * ****************************************************************** */
-void RLQlLambda::episode_plan() {
+void RLCBLambda::episode_plan() {
     int s = pv_model->size();
     int i = (int)(drand48()*(s-1));
     element* e = &(*pv_model)[i];
@@ -235,7 +237,7 @@ void RLQlLambda::episode_plan() {
     'reward' is the reward the agent recieves as it transitions into the
     final state:  S[end-1] -> a -> reward -> S[end]
  * ****************************************************************** */
-void RLQlLambda::episode_end(float reward, float value_of_final_state) {
+void RLCBLambda::episode_end(float reward, float value_of_final_state) {
     double delta = reward - v_Q[i_prev_action];
     delta += (f_gamma * value_of_final_state);  
     updateWeights(delta);
@@ -268,7 +270,7 @@ void RLQlLambda::episode_end(float reward, float value_of_final_state) {
 /* *********************************************************************
    Compute all the action values from current activeFeatures and weights
  * ****************************************************************** */
-void RLQlLambda::computeActionValues() {
+void RLCBLambda::computeActionValues() {
 	for (int a = 0; a < i_num_actions; a++) {
 		v_Q[a] = 0;
 		for (int j = 0; j < (*pv_num_nonzero_in_f)[a]; j++) {
@@ -283,7 +285,7 @@ void RLQlLambda::computeActionValues() {
 /* *********************************************************************
    Compute all the action values in epsiode_plan
  * ****************************************************************** */
-FloatVect RLQlLambda::computeActionValuesPlan(FeatureMap* fm, IntVect* num_nonzero_in_f){
+FloatVect RLCBLambda::computeActionValuesPlan(FeatureMap* fm, IntVect* num_nonzero_in_f){
     FloatVect Q (i_num_actions);
 
     for (int a = 0; a < i_num_actions; a++) {
@@ -304,7 +306,7 @@ FloatVect RLQlLambda::computeActionValuesPlan(FeatureMap* fm, IntVect* num_nonze
     Compute a particular action value from current activeFeatures and 
     weights
  * ****************************************************************** */
-void RLQlLambda::computeActionValues(int a) {
+void RLCBLambda::computeActionValues(int a) {
 	v_Q[a] = 0;
     for (int j = 0; j < (*pv_num_nonzero_in_f)[a]; j++) { 
 		v_Q[a] += (*pv_weights)[(*pv_curr_features_map)[a][j]];
@@ -319,7 +321,7 @@ void RLQlLambda::computeActionValues(int a) {
     Returns index (action) of largest entry in QSA array, breaking ties 
     randomly
  * ****************************************************************** */
-int RLQlLambda::argmax(FloatVect& QSA) {
+int RLCBLambda::argmax(FloatVect& QSA) {
 	int best_action = 0;
     double best_value = QSA[0];
     int num_ties = 1;                    // actually the number of ties plus 1
@@ -348,7 +350,7 @@ int RLQlLambda::argmax(FloatVect& QSA) {
 /* *********************************************************************
     Returns largest entry in QSA array, breaking ties randomly
  * ****************************************************************** */
-int RLQlLambda::max(FloatVect& QSA) {
+int RLCBLambda::max(FloatVect& QSA) {
     int best_action = 0;
     double best_value = QSA[0];
     int num_ties = 1;                    // actually the number of ties plus 1
@@ -376,7 +378,7 @@ int RLQlLambda::max(FloatVect& QSA) {
 /* *********************************************************************
     Select an action according to epsilon greedy policy 
  * ****************************************************************** */
-int RLQlLambda::selectEpsilonGreedyAction() {
+int RLCBLambda::selectEpsilonGreedyAction() {
 	if(drand48() <= f_epsilon) {
 		int rnd =  (int)(drand48()*(i_num_actions));
 		return rnd;
@@ -390,7 +392,7 @@ int RLQlLambda::selectEpsilonGreedyAction() {
     At the beggining of every episode, decay traces, clear action 
     traces and replace current trace
  * ****************************************************************** */
-void RLQlLambda::updateTraces() {
+void RLCBLambda::updateTraces() {
 	DecayTraces(f_gamma * f_lambda);                              
 	for (int a = 0; a < i_num_actions; a++) { 
 		if (a != i_prev_action) {
@@ -408,7 +410,7 @@ void RLQlLambda::updateTraces() {
 /* *********************************************************************
     Update weights with nonzero traces using td-error
  * ****************************************************************** */
-void RLQlLambda::updateWeights(double delta) {
+void RLCBLambda::updateWeights(double delta) {
 	assert(f_alpha >= 0);
 	double temp = f_alpha * delta;
 	for (int i = 0; i < i_num_nonzero_traces; i++) { 
@@ -422,7 +424,7 @@ void RLQlLambda::updateWeights(double delta) {
     This is for debugging only: prints the largest (+/-) value in 
     pv_weights and pv_traces
  * ****************************************************************** */
-void RLQlLambda::print_largest_weight(void) {
+void RLCBLambda::print_largest_weight(void) {
     double largest_weight = 0;
     double smallest_weight = 0;
     double largest_trace = 0;
@@ -451,7 +453,7 @@ void RLQlLambda::print_largest_weight(void) {
 /* *********************************************************************
     clear or zero-out trace, if any, for given feature
  * ****************************************************************** */
-void RLQlLambda::ClearTrace(int f) {
+void RLCBLambda::ClearTrace(int f) {
 	if (!((*pv_traces)[f] == 0.0)) {
         ClearExistentTrace(f, (*pv_nonzero_traces_inv_ind)[f]);
     }
@@ -460,7 +462,7 @@ void RLQlLambda::ClearTrace(int f) {
 /* *********************************************************************
     clear trace at given location in list of nonzero-traces
  * ****************************************************************** */
-void RLQlLambda::ClearExistentTrace(int f, int loc) { 
+void RLCBLambda::ClearExistentTrace(int f, int loc) { 
     (*pv_traces)[f] = 0.0;
     i_num_nonzero_traces--;
     (*pv_nonzero_traces_ind)[loc] = (*pv_nonzero_traces_ind)[i_num_nonzero_traces];
@@ -470,7 +472,7 @@ void RLQlLambda::ClearExistentTrace(int f, int loc) {
 /* *********************************************************************
     Decay all nonzero traces
  * ****************************************************************** */
-void RLQlLambda::DecayTraces(float decay_rate) {
+void RLCBLambda::DecayTraces(float decay_rate) {
 	for (int loc = i_num_nonzero_traces - 1; loc >= 0; loc--) { 
 		int f = (*pv_nonzero_traces_ind)[loc];
         (*pv_traces)[f] *= decay_rate;
@@ -483,7 +485,7 @@ void RLQlLambda::DecayTraces(float decay_rate) {
 /* *********************************************************************
     set trace to given value
  * ****************************************************************** */
-void RLQlLambda::SetTrace(int f, float new_trace_value) {
+void RLCBLambda::SetTrace(int f, float new_trace_value) {
     if ((*pv_traces)[f] >= f_minimum_trace) {
         (*pv_traces)[f] = new_trace_value;         // trace already exists
     } else { 
@@ -501,7 +503,7 @@ void RLQlLambda::SetTrace(int f, float new_trace_value) {
     Try to make room for more traces by incrementing minimum_trace by 10%, 
     culling any traces that fall below the new minimum
  * ****************************************************************** */
-void RLQlLambda::IncreaseMinTrace() {
+void RLCBLambda::IncreaseMinTrace() {
     f_minimum_trace += (0.1 * f_minimum_trace);
     for (int loc = i_num_nonzero_traces - 1; loc >= 0; loc--) {
         int f = (*pv_nonzero_traces_ind)[loc];
@@ -516,7 +518,7 @@ void RLQlLambda::IncreaseMinTrace() {
 /* *********************************************************************
    Saves the weights vector to file
  * ****************************************************************** */
-void RLQlLambda::export_weights(const string& filename) {
+void RLCBLambda::export_weights(const string& filename) {
     export_array(pv_weights, filename);
     for (unsigned int i = 0; i < 10; i++) {
         cout << (*pv_weights)[i] << ", ";
@@ -529,7 +531,7 @@ void RLQlLambda::export_weights(const string& filename) {
 /* *********************************************************************
    Loads the weights vector from file
  * ****************************************************************** */
-void RLQlLambda::import_weights(const string& filename) {
+void RLCBLambda::import_weights(const string& filename) {
     import_array(pv_weights, filename);
     cout << "Weights Vector importd fromfile" + filename << endl;
     cout << "First 10 values: ";
@@ -545,7 +547,7 @@ void RLQlLambda::import_weights(const string& filename) {
 /* *********************************************************************
 	Takes care of shrinking the weights-vector (when it is enabled)
  * ****************************************************************** */
-void RLQlLambda::shrink_weights_vect(void) {
+void RLCBLambda::shrink_weights_vect(void) {
 	if ((i_shrink_weights_frq <= 0) || 
 		(i_episode_counter % i_shrink_weights_frq != 0)) {
 		return;
@@ -582,11 +584,11 @@ void RLQlLambda::shrink_weights_vect(void) {
 }
 
 /* *********************************************************************
-	Generates an instance of one of the RLQlLambda subclasses, based 
+	Generates an instance of one of the RLCBLambda subclasses, based 
 	on the values of use_idbd and use_delta_bar_delta 
 	Note: The caller is resposible for deleting the returned pointer
 ******************************************************************** */
-RLQlLambda* RLQlLambda::generate_rl_ql_lambda_instance(
+RLCBLambda* RLCBLambda::generate_rl_cb_lambda_instance(
 							OSystem* _osystem, int feature_vec_size,
 							int num_actions) {
 	Settings& settings = _osystem->settings();
@@ -609,7 +611,7 @@ RLQlLambda* RLQlLambda::generate_rl_ql_lambda_instance(
 		cerr << "use_idbd and use_delta_bar_delta cannot both be true" << endl;
 		exit(-1);
 	}
-	RLQlLambda* ql_lambda_solver = NULL;
+	RLCBLambda* cb_lambda_solver = NULL;
 	if (use_delta_bar_delta) {
 		float eps_start = alpha;
 		float k = (alpha / 2.0);
@@ -620,31 +622,31 @@ RLQlLambda* RLQlLambda::generate_rl_ql_lambda_instance(
 		     << "\t k = " << k << endl
 			 << "\t phi = " << phi << endl
 			 << "\t theta = " << theta << endl;
-		ql_lambda_solver = new RLQlLambdaWithDeltaBarDelta(  _osystem, 
+		cb_lambda_solver = new RLCBLambdaWithDeltaBarDelta(  _osystem, 
 													feature_vec_size, 
 													num_actions, 
 													eps_start, k, phi, theta, 
 													exp_w_frq);		
 	} else if (use_idbd) {
 		cout << "Using iDBD. " << endl ;
-		ql_lambda_solver = new RLQlLambdaWithIDBD(_osystem, 
+		cb_lambda_solver = new RLCBLambdaWithIDBD(_osystem, 
 														feature_vec_size,  
 														num_actions, 
 														exp_w_frq);
 	} else {
 		cout << "Using static Alpha. " << endl ;
-		ql_lambda_solver = new RLQlLambda(  _osystem, 
+		cb_lambda_solver = new RLCBLambda(  _osystem, 
 													feature_vec_size, 
 													num_actions, alpha, 
 													exp_w_frq);
 	}
-	return ql_lambda_solver;
+	return cb_lambda_solver;
 
 }
 
 
 /* *************************************************************************
-* class RLQlLambdaWithIDBD
+* class RLCBLambdaWithIDBD
 * 
 *	Q-learning-Lambda with Incremental Delta-Bar-Delta
 *  (This version doesn't need a alpha parameter for stepsize. Instead it
@@ -656,10 +658,10 @@ RLQlLambda* RLQlLambda::generate_rl_ql_lambda_instance(
 /* *********************************************************************
 	Constructor
  ******************************************************************** */
-RLQlLambdaWithIDBD::RLQlLambdaWithIDBD(	OSystem* _osystem, 
+RLCBLambdaWithIDBD::RLCBLambdaWithIDBD(	OSystem* _osystem, 
 						int feature_vec_size,  int num_actions,  
 						int save_weights_freq) : 
-						RLQlLambda(	_osystem, feature_vec_size, num_actions, 
+						RLCBLambda(	_osystem, feature_vec_size, num_actions, 
 										-1.0, save_weights_freq)  {
 	Settings& settings = p_osystem->settings();
     f_theta = settings.getFloat("theta", true);
@@ -675,7 +677,7 @@ RLQlLambdaWithIDBD::RLQlLambdaWithIDBD(	OSystem* _osystem,
 /* *********************************************************************
 	Deconstructor
  ******************************************************************** */
-RLQlLambdaWithIDBD::~RLQlLambdaWithIDBD() {
+RLCBLambdaWithIDBD::~RLCBLambdaWithIDBD() {
 	delete pv_h;
 	delete pv_beta;
 }
@@ -684,7 +686,7 @@ RLQlLambdaWithIDBD::~RLQlLambdaWithIDBD() {
 	Update weights with nonzero traces using td-error
 	TODO: We may want to bound Beta
  * ****************************************************************** */
-void RLQlLambdaWithIDBD::updateWeights(double delta) {
+void RLCBLambdaWithIDBD::updateWeights(double delta) {
 	double alpha, decay;
 	for (int i = 0; i < i_num_nonzero_traces; i++) {
 		int index = (*pv_nonzero_traces_ind)[i];
@@ -705,7 +707,7 @@ void RLQlLambdaWithIDBD::updateWeights(double delta) {
 
 
 /* *************************************************************************
-*	class RLQlLambdaWithDeltaBarDelta:public RLQlLambda
+*	class RLCBLambdaWithDeltaBarDelta:public RLCBLambda
 
 *	Q-learning-Lambda with Delta-Bar-Delta (this is not Rich's iDBD, but the 
 *	version previous to it by Jacob)
@@ -717,11 +719,11 @@ void RLQlLambdaWithIDBD::updateWeights(double delta) {
 /* *********************************************************************
 	Constructor
  ******************************************************************** */
-RLQlLambdaWithDeltaBarDelta::RLQlLambdaWithDeltaBarDelta(
+RLCBLambdaWithDeltaBarDelta::RLCBLambdaWithDeltaBarDelta(
 		OSystem* _osystem, int feature_vec_size, 
 		int num_actions, double eps_start, double k, double phi, double theta,
 		int save_weights_freq) : 
-		RLQlLambda(	_osystem, feature_vec_size, num_actions, 
+		RLCBLambda(	_osystem, feature_vec_size, num_actions, 
 		-1.0, save_weights_freq)  {
 	f_k = k;
 	f_phi = phi;
@@ -737,7 +739,7 @@ RLQlLambdaWithDeltaBarDelta::RLQlLambdaWithDeltaBarDelta(
 /* *********************************************************************
 	Deconstructor
  ******************************************************************** */
-RLQlLambdaWithDeltaBarDelta::~RLQlLambdaWithDeltaBarDelta() {
+RLCBLambdaWithDeltaBarDelta::~RLCBLambdaWithDeltaBarDelta() {
 	delete pv_eps;
 	delete pv_delta_bar;
 }
@@ -745,7 +747,7 @@ RLQlLambdaWithDeltaBarDelta::~RLQlLambdaWithDeltaBarDelta() {
 /* *********************************************************************
 	Update weights with nonzero traces using td-error
  * ****************************************************************** */
-void RLQlLambdaWithDeltaBarDelta::updateWeights(double delta) {
+void RLCBLambdaWithDeltaBarDelta::updateWeights(double delta) {
 	double new_delta, delta_bar_delta;
 	for (int i = 0; i < i_num_nonzero_traces; i++) {
 		int index = (*pv_nonzero_traces_ind)[i];

@@ -62,6 +62,11 @@ class SearchTree {
 		virtual Action get_best_action(void);	
 
 		/* *********************************************************************
+            Returns the best action index based on the expanded search tree
+         ******************************************************************* */
+		virtual int get_best_action_index(void);
+
+		/* *********************************************************************
 			Moves the best sub-branch of the root to be the new root of the tree
          ******************************************************************* */
 		virtual void move_to_best_sub_branch(void);

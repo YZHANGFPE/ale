@@ -39,6 +39,14 @@ class SearchAgent : public PlayerAgent {
         virtual Action agent_step(  const IntMatrix* screen_matrix, 
                                     const IntVect* console_ram, 
 									int frame_number);
+
+        /* *********************************************************************
+            Returns the best action index from the set of possible actions
+         ******************************************************************** */
+        virtual int agent_step_cb(  const IntMatrix* screen_matrix, 
+                                    const IntVect* console_ram, 
+									int frame_number);
+
         /* *********************************************************************
             This method is called when the game ends. 
          ******************************************************************** */

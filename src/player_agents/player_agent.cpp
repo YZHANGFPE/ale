@@ -17,6 +17,7 @@
 #include "ram_agent.h"
 #include "ram_agent_ql.h"
 #include "ram_agent_dq.h"
+#include "ram_agent_cb.h"
 #include "class_agent.h"
 #include "grid_screen_agent.h"
 #include "search_agent.h"
@@ -261,7 +262,7 @@ Action PlayerAgent::agent_step( const IntMatrix* screen_matrix,
             break;
         }
 		case ACTION_EXPLOR:
-			cout << "I am starting 3" << endl;
+			
 			// We are trying each action for a number of frames
 			if (i_curr_act_frame_count == 0) {
 				// Goto the next action
@@ -416,6 +417,9 @@ PlayerAgent* PlayerAgent::generate_agent_instance(
     } else if (player_agent == "ram_agent_dq") {
         cout << "Game will be controlled by RAM Agent (DynaQ)" << endl;
         new_agent = new RAMAgentDQ(_game_settings, _osystem);
+    } else if (player_agent == "ram_agent_cb") {
+        cout << "Game will be controlled by RAM Agent (Planning-learning combined)" << endl;
+        new_agent = new RAMAgentCB(_game_settings, _osystem);
     } else if (player_agent == "class_agent") {
         cout << "Game will be controlled by Class Agent" << endl;
         new_agent = new ClassAgent(_game_settings, _osystem);
