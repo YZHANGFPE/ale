@@ -45,6 +45,7 @@ RAMAgentCB::RAMAgentCB(GameSettings* _game_settings, OSystem* _osystem) :
 
 	b_end_episode_with_reward = p_osystem->settings().getBool(
 											"end_episode_with_reward", true);
+    search_agent = new SearchAgent(_game_settings, _osystem);
 }
 
 RAMAgentCB::~RAMAgentCB() {
@@ -62,11 +63,22 @@ RAMAgentCB::~RAMAgentCB() {
 Action RAMAgentCB::agent_step(const IntMatrix* screen_matrix, 
                             const IntVect* console_ram, 
 							int frame_number) {
+    int planning_episode = 0;
+    
+    
     Action special_action = PlayerAgent::agent_step(screen_matrix, console_ram,
 													frame_number);
     if (special_action != UNDEFINED) {
         return special_action;  // We are resettign or in some sort of delay 
     }
+
+
+    if (i_episode_counter == planning_episode) {
+
+        Action a = search_agent->agent_step_cb(screen_matrix, console_ram,frame_number);
+    }
+    
+
 	if (b_end_episode_with_reward && b_reward_on_this_frame) {
 		cout << "Ending episode with reward: V(end) = " << f_curr_reward << endl;
 		p_cb_lambda_solver->episode_end(f_curr_reward, f_curr_reward);
@@ -76,10 +88,6 @@ Action RAMAgentCB::agent_step(const IntMatrix* screen_matrix,
     generate_feature_vec();
 	int next_action_ind;
     //next_action_ind = search_agent->agent_step_cb(screen_matrix, console_ram,frame_number);
-    //search_agent.agent_step(screen_matrix, console_ram,frame_number);
-	if (next_action_ind >= 18){
-        next_action_ind = 0;
-    } 
 
     if (e_episode_status == ACTION_EXPLOR) {
 		next_action_ind = p_cb_lambda_solver->episode_step(
@@ -88,15 +96,23 @@ Action RAMAgentCB::agent_step(const IntMatrix* screen_matrix,
                                                    f_curr_reward, 
 												   i_curr_expl_act_index);
 		assert(next_action_ind == i_curr_expl_act_index);
-	} else {
-		next_action_ind = p_cb_lambda_solver->episode_step(
+	} 
+    else if (i_episode_counter == planning_episode){
+
+        next_action_ind = p_cb_lambda_solver->episode_step(
                                                    pv_curr_feature_map, 
                                                    pv_num_nonzero_in_f,
                                                    f_curr_reward,
-                                                   next_action_ind);
+                                                   search_agent->action_idx);
+        cout << "Reward: " << f_episode_reward << endl;
+
+    }
+    else {
+		next_action_ind = p_cb_lambda_solver->episode_step(
+                                                   pv_curr_feature_map, 
+                                                   pv_num_nonzero_in_f,
+                                                   f_curr_reward);
 	}
-    
-    //cout << next_action_ind << endl;
     return (*(p_game_settings->pv_possible_actions))[next_action_ind];
 }
 

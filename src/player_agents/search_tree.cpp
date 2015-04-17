@@ -125,6 +125,7 @@ int SearchTree::get_best_action_index(void){
 	Moves the best sub-branch of the root to be the new root of the tree
  ******************************************************************* */
 void SearchTree::move_to_best_sub_branch(void) {
+	cout << "I am in the wrong place" << endl;
 	assert(p_root->v_children.size() > 0);
 	assert(p_root->i_best_branch != -1);
 	for (int del = 0; del < p_root->v_children.size(); del++) {

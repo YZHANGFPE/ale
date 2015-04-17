@@ -17,7 +17,7 @@
 #define RAM_AGENT_CB_H
 
 #include "common_constants.h"
-#include "player_agent.h"
+#include "search_agent.h"
 #include "rl_cb_lambda.h"
 #include "search_tree.h"
 #include "OSystem.hxx"
@@ -113,6 +113,7 @@ class RAMAgentCB : public PlayerAgent {
         float f_alpha_multiplier;
         IntVect* pv_subvector_positions;
 		bool b_end_episode_with_reward;
+        SearchAgent* search_agent;
 };
 
 

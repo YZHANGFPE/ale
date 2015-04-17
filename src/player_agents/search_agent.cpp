@@ -36,6 +36,7 @@ SearchAgent::SearchAgent(GameSettings* _game_settings, OSystem* _osystem) :
     i_screen_height = mediasrc.height();
 	s_cartridge_md5  = p_osystem->console().properties().get(Cartridge_MD5);
 	init_simulation_engine();
+	action_idx = 0;
 	e_curr_action = UNDEFINED;
 	if (p_game_settings->i_skip_frames_num != 0) {
 		p_game_settings->i_skip_frames_num = 0;
@@ -129,6 +130,7 @@ Action SearchAgent::agent_step( const IntMatrix* screen_matrix,
 		// after restoring the state for one turn. This *hack* allows 
 		// basically skips exporting teh screen for one turn
 		i_skip_export_on_frame = i_frame_counter + 1;
+
 	}
 	return e_curr_action;
 }
@@ -137,14 +139,22 @@ Action SearchAgent::agent_step( const IntMatrix* screen_matrix,
 /* *********************************************************************
     Returns the best action index from the set of possible actions
  ******************************************************************** */
-int SearchAgent::agent_step_cb(  const IntMatrix* screen_matrix, 
+Action SearchAgent::agent_step_cb(  const IntMatrix* screen_matrix, 
                                     const IntVect* console_ram, 
 									int frame_number){
-    Action special_action = PlayerAgent::agent_step(screen_matrix, console_ram,
-													frame_number);
-	i_curr_num_sim_steps = 0; 
-	int action = 0;
 
+    /*Action special_action = PlayerAgent::agent_step(screen_matrix, console_ram,
+													frame_number);
+    if (special_action != UNDEFINED) {
+    	action_idx = -1;
+        return special_action;  // We are resettign or in a delay 
+    }*/
+    i_frame_counter = frame_number;
+    pm_curr_screen_matrix = screen_matrix; 
+    pv_curr_console_ram = console_ram;  
+
+    
+	i_curr_num_sim_steps = 0;
 	if (i_frame_counter >= i_next_act_frame) {
 		// Run a new simulation to find the next action
 		i_next_act_frame = i_frame_counter + i_sim_steps_per_node;
@@ -166,10 +176,9 @@ int SearchAgent::agent_step_cb(  const IntMatrix* screen_matrix,
 			p_search_tree->build(str_curr_state, i_frame_counter);
 			cout << "Tree Re-Constructed: ";
 		}
-		cout << "I am before" << endl;
-		action = 0;
-		p_search_tree->get_best_action();
-		cout << action <<endl;
+		cout << "Reward: " << f_episode_reward << endl;
+		action_idx = p_search_tree->get_best_action_index();
+		e_curr_action = (*(p_game_settings->pv_possible_actions))[action_idx];
 		cout << " Root Value = " << p_search_tree->get_root_value();  
 		cout << " - Deepest Node Frame: " 
 			 << p_search_tree->i_deepest_node_frame_num << endl;
@@ -178,8 +187,10 @@ int SearchAgent::agent_step_cb(  const IntMatrix* screen_matrix,
 		// after restoring the state for one turn. This *hack* allows 
 		// basically skips exporting teh screen for one turn
 		i_skip_export_on_frame = i_frame_counter + 1;
+
+
 	}
-	return action;
+	return e_curr_action;
 }
 
 

@@ -43,7 +43,7 @@ class SearchAgent : public PlayerAgent {
         /* *********************************************************************
             Returns the best action index from the set of possible actions
          ******************************************************************** */
-        virtual int agent_step_cb(  const IntMatrix* screen_matrix, 
+        virtual Action agent_step_cb(  const IntMatrix* screen_matrix, 
                                     const IntVect* console_ram, 
 									int frame_number);
 
@@ -56,6 +56,8 @@ class SearchAgent : public PlayerAgent {
             Returns the number of simulate steps during the current turn
          ******************************************************************** */
         int get_num_simulated_steps(void) const {return i_curr_num_sim_steps;}
+        int action_idx;
+        Action sa;
 
 
 	protected:

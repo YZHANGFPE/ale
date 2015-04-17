@@ -171,6 +171,7 @@ Action PlayerAgent::agent_step( const IntMatrix* screen_matrix,
 
 	f_curr_reward = p_game_settings->get_reward(screen_matrix, console_ram);
 	pv_reward_per_frame->push_back(f_curr_reward);
+
 	if (f_curr_reward > 0) { 
 		b_reward_on_this_frame = true;
 	} else {
@@ -293,6 +294,9 @@ Action PlayerAgent::agent_step( const IntMatrix* screen_matrix,
 				game_ended = true;
 			}
 			int num_frames_in_episode = i_frame_counter - i_episode_first_frame;
+			//cout << "Frame: " << num_frames_in_episode << endl;
+			// cout << "Reward: " << f_episode_reward << endl;
+
 			if (i_max_num_frames_per_episode != -1 && 
 				num_frames_in_episode > i_max_num_frames_per_episode) {
 				cout << "Reached maximum frames per episode. "<< endl;
