@@ -14,7 +14,7 @@
  **************************************************************************** */
 #ifndef PLAYER_AGENT_H
 #define PLAYER_AGENT_H
-
+#include <sstream>
 #include "OSystem.hxx"
 #include "common_constants.h"
 #include "game_settings.h"
@@ -180,6 +180,8 @@ class PlayerAgent  {
 										  // from exporting. This is a *hack*
 										  // to get around the emulation
 										  // jump-screen bug.
+        string rom_name;
+        string player_agent;
 
 };
 

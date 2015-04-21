@@ -63,7 +63,7 @@ RAMAgentCB::~RAMAgentCB() {
 Action RAMAgentCB::agent_step(const IntMatrix* screen_matrix, 
                             const IntVect* console_ram, 
 							int frame_number) {
-    int planning_episode = 0;
+    int planning_episode = 1;
     
     
     Action special_action = PlayerAgent::agent_step(screen_matrix, console_ram,

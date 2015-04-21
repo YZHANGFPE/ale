@@ -135,6 +135,7 @@ int RLCBLambda::episode_start(   FeatureMap* new_feature_map,
     pv_num_nonzero_in_f = num_nonzero_in_f;
     *pv_num_nonzero_in_f_prev = *num_nonzero_in_f;
 
+    if (i_episode_counter >= 9000) f_epsilon = 0;
 
     computeActionValues(); 
 	if (forced_action_ind == -1) {	

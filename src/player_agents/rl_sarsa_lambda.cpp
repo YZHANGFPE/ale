@@ -125,6 +125,7 @@ RLSarsaLambda::~RLSarsaLambda() {
 int RLSarsaLambda::episode_start(   FeatureMap* new_feature_map, 
                                     IntVect* num_nonzero_in_f, 
 									int forced_action_ind) {
+    if (i_episode_counter >= 9000) f_epsilon = 0;
     DecayTraces(0.0); 
     pv_curr_features_map = new_feature_map;
     pv_num_nonzero_in_f = num_nonzero_in_f;

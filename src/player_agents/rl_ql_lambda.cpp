@@ -135,6 +135,8 @@ int RLQlLambda::episode_start(   FeatureMap* new_feature_map,
     pv_num_nonzero_in_f = num_nonzero_in_f;
     *pv_num_nonzero_in_f_prev = *num_nonzero_in_f;
 
+    if (i_episode_counter >= 9000) f_epsilon = 0;
+
 
     computeActionValues(); 
 	if (forced_action_ind == -1) {	
@@ -180,8 +182,8 @@ int RLQlLambda::episode_step(FeatureMap* new_feature_map,
     
 
     // update prev feature map and none zero vector
-    *pv_prev_features_map = *pv_curr_features_map;
-    *pv_num_nonzero_in_f_prev = *pv_num_nonzero_in_f;
+/*    *pv_prev_features_map = *pv_curr_features_map;
+    *pv_num_nonzero_in_f_prev = *pv_num_nonzero_in_f;*/
 
 	computeActionValues();		 //new action values based on new observation
 	if (forced_action_ind == -1) {	
