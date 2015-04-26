@@ -1,11 +1,11 @@
 ; Parameters regarding running an experiment
 random_seed = "time"
 ;max_num_frames = 8000
-max_num_episodes = 20
-max_num_frames_per_episode = 1800
+max_num_episodes = 10
+max_num_frames_per_episode = 1000
 ;num_episodes_to_avg_results = 3
-export_weights_frq = 5000
-export_rewards_frq = 2000
+export_weights_frq = 0
+export_rewards_frq = 10
 init_act_explor_count = 0
 minus_one_zero_reward = false 
 ;export_screens_on_last_n_screens = 0

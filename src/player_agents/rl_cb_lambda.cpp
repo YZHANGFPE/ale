@@ -106,12 +106,16 @@ RLCBLambda::RLCBLambda(   OSystem* _osystem, int feature_vec_size,
 		cout << "Importing the weights vector from: << " << import_file << endl;
 		import_array(pv_weights, import_file);
 	}
+
+    myfile.open("./output/weight_summary.txt");
+    myfile << "Episode Largest_weight Smallest_weight Largest_trace Smallest_trace Number_of_non_initial_weight\n";
 }
 
 /* *********************************************************************
     Deconstructor
  ******************************************************************** */
 RLCBLambda::~RLCBLambda() {
+    myfile.close();
     delete pv_weights;
     delete pv_traces;
     delete pv_nonzero_traces_ind;
@@ -162,7 +166,7 @@ int RLCBLambda::episode_start(   FeatureMap* new_feature_map,
 int RLCBLambda::episode_step(FeatureMap* new_feature_map, 
                                 IntVect* num_nonzero_in_f, float new_reward, 
 								int forced_action_ind) {
-
+    if (forced_action_ind != -1) new_reward *= 1000;
     i_frame_counter++;
 	assert(i_prev_action != -1);
 	double delta = new_reward - v_Q[i_prev_action];	
@@ -262,6 +266,7 @@ void RLCBLambda::episode_end(float reward, float value_of_final_state) {
         export_weights(filename.str());
         cout << "done." << endl;
     }
+    print_largest_weight();
     delete pv_prev_features_map;
     delete pv_num_nonzero_in_f_prev;
     delete pv_model;
@@ -271,6 +276,7 @@ void RLCBLambda::episode_end(float reward, float value_of_final_state) {
    Compute all the action values from current activeFeatures and weights
  * ****************************************************************** */
 void RLCBLambda::computeActionValues() {
+    
 	for (int a = 0; a < i_num_actions; a++) {
 		v_Q[a] = 0;
 		for (int j = 0; j < (*pv_num_nonzero_in_f)[a]; j++) {
@@ -448,6 +454,20 @@ void RLCBLambda::print_largest_weight(void) {
     cout << "Largest Trace: " << largest_trace << " - ";
     cout << "Smallest Trace: " << smallest_trace << endl;
     cout << "*********************************************************" << endl;
+
+    int num_non_initial = 0;
+    float init_weight = (float) 1/i_feature_vec_size;
+    for (unsigned int i = 0; i < pv_weights->size(); i++) {
+        if ((*pv_weights)[i] != init_weight) {
+            num_non_initial++;
+        }
+    }
+    myfile << i_episode_counter << " ";
+    myfile << largest_weight << " ";
+    myfile << smallest_weight << " ";
+    myfile << largest_trace << " ";
+    myfile << smallest_trace << " ";
+    myfile << num_non_initial << endl;
 }
 
 /* *********************************************************************

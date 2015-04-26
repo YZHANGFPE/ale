@@ -22,6 +22,7 @@
 
 #include "common_constants.h"
 #include "search_agent.h"
+#include <fstream>
 class OSystem;
 
 class RLCBLambda {
@@ -251,6 +252,7 @@ class RLCBLambda {
         };
         typedef vector< element > EleVect;
         EleVect* pv_model;
+        ofstream myfile;
         
         
         

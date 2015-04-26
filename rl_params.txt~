@@ -1,16 +1,16 @@
 ; The RL Parameters are stored here
 include_abs_positions = True
-alpha = 0.1
+alpha = 0.3
 num_tilings = 8
 num_rectangles = 8
 mem_size_multiplier = 10
 epsilon = 0.1
 epsilon_dim_start = -1.0
 alpha_multiplier = 10
-lambda = 0.5
+lambda = 0.3
 gamma = 0.999
 ; theta = 0.001
-optimistic_init = false
+optimistic_init = true
 ; use_idbd = true
 normalize_feature_vector = true
 trace_vec_size_ratio = 1.0
