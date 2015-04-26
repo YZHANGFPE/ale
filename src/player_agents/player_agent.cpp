@@ -29,6 +29,7 @@
 #include "random_tools.h"
 #include "vector_matrix_tools.h"
 #include "FSNode.hxx"
+#include <cstdlib>
 
 /* **********************************************************************
     Constructor
@@ -117,6 +118,23 @@ PlayerAgent::PlayerAgent(GameSettings* _game_settings, OSystem* _osystem) :
 	i_curr_expl_act_index = 0;
 	i_curr_act_frame_count = i_init_act_explor_count;
 	b_reward_on_this_frame = false;
+
+	string player_agent = _osystem->settings().getString("player_agent");
+	string rom_file = _osystem->settings().getString("rom_file");
+	string suffix = _osystem->settings().getString("suffix");
+    int len = rom_file.length() - 11;
+    string rom_name = rom_file.substr(7,len);
+
+    string dir = "./output/" + player_agent + "_" + rom_name + "_" + suffix + "/";
+    string command = "mkdir -p " + dir;
+    const int dir_err = system(command.c_str());
+    if (-1 == dir_err)
+    {
+        printf("Error creating directory!n");
+        exit(1);
+    }
+    _osystem->settings().setString("prefix", dir);
+    prefix = dir;
 }
 
 /* **********************************************************************
@@ -359,7 +377,7 @@ void PlayerAgent::on_end_of_game(void) {
             ", Sum Reward = " << f_episode_reward << endl;
     f_episode_reward = 0;
     i_episode_counter++;
-    char prefix[10] = "./output/";
+
     
     if ((i_export_rewards_frq != 0) &&
         (i_episode_counter % i_export_rewards_frq == 0)) {
@@ -458,9 +476,10 @@ PlayerAgent* PlayerAgent::generate_agent_instance(
 	Finishes the game and saves anythign that might need saving
  ******************************************************************** */
 void PlayerAgent::end_game(void) {
-	char prefix[10] = "./output/";
+
 	cout << "quitting..." << endl;
 	ostringstream filename;
+	cout << "prefix is :" << prefix << endl;
 	filename << prefix << "reward_per_episode__epis_0_" << i_episode_counter << ".txt";
 	export_vector(pv_reward_per_episode, filename.str());
 	filename.str("");

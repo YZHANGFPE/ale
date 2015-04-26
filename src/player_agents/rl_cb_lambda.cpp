@@ -106,8 +106,9 @@ RLCBLambda::RLCBLambda(   OSystem* _osystem, int feature_vec_size,
 		cout << "Importing the weights vector from: << " << import_file << endl;
 		import_array(pv_weights, import_file);
 	}
-
-    myfile.open("./output/weight_summary.txt");
+    string prefix = _osystem->settings().getString("prefix");
+    string filename = prefix + "weight_summary.txt";
+    myfile.open(filename.c_str());
     myfile << "Episode Largest_weight Smallest_weight Largest_trace Smallest_trace Number_of_non_initial_weight\n";
 }
 

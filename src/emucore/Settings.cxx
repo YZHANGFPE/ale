@@ -198,6 +198,7 @@ Settings::Settings(OSystem* osystem) : myOSystem(osystem) {
 	setInternal("shrink_weights_frq", "0");		// How often to remove the 
 												// smallest value in the weights
 												// vactor.
+  setInternal("prefix","");
 
 }
 

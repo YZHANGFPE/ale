@@ -20,6 +20,7 @@
 #include "game_settings.h"
 #include "background_detector.h"
 #include "class_discovery.h"
+#include <string>
 
 class PlayerAgent  {
     /* *************************************************************************
@@ -180,6 +181,7 @@ class PlayerAgent  {
 										  // from exporting. This is a *hack*
 										  // to get around the emulation
 										  // jump-screen bug.
+        std::string prefix;
 
 };
 
