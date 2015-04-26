@@ -46,6 +46,7 @@ RAMAgentCB::RAMAgentCB(GameSettings* _game_settings, OSystem* _osystem) :
 	b_end_episode_with_reward = p_osystem->settings().getBool(
 											"end_episode_with_reward", true);
     search_agent = new SearchAgent(_game_settings, _osystem);
+    planning_episode = p_osystem->settings().getInt("planning_episode");
 }
 
 RAMAgentCB::~RAMAgentCB() {
@@ -63,7 +64,6 @@ RAMAgentCB::~RAMAgentCB() {
 Action RAMAgentCB::agent_step(const IntMatrix* screen_matrix, 
                             const IntVect* console_ram, 
 							int frame_number) {
-    int planning_episode = 11;
     
     
     Action special_action = PlayerAgent::agent_step(screen_matrix, console_ram,

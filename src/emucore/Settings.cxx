@@ -199,6 +199,8 @@ Settings::Settings(OSystem* osystem) : myOSystem(osystem) {
 												// smallest value in the weights
 												// vactor.
   setInternal("prefix","");
+  setInternal("reward","1");
+  setInternal("planning_episode","1");
 
 }
 

@@ -114,6 +114,7 @@ class RAMAgentCB : public PlayerAgent {
         IntVect* pv_subvector_positions;
 		bool b_end_episode_with_reward;
         SearchAgent* search_agent;
+        int planning_episode;
 };
 
 

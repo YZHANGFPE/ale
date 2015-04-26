@@ -253,6 +253,7 @@ class RLCBLambda {
         typedef vector< element > EleVect;
         EleVect* pv_model;
         ofstream myfile;
+        int rewardRate;
         
         
         

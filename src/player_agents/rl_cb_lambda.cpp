@@ -110,6 +110,8 @@ RLCBLambda::RLCBLambda(   OSystem* _osystem, int feature_vec_size,
     string filename = prefix + "weight_summary.txt";
     myfile.open(filename.c_str());
     myfile << "Episode Largest_weight Smallest_weight Largest_trace Smallest_trace Number_of_non_initial_weight\n";
+
+    rewardRate = _osystem->settings().getInt("reward");
 }
 
 /* *********************************************************************
@@ -147,7 +149,7 @@ int RLCBLambda::episode_start(   FeatureMap* new_feature_map,
 	} else {
 		i_prev_action = forced_action_ind;
 	}
-    \
+    
 	return i_prev_action;
 }
 
@@ -167,7 +169,8 @@ int RLCBLambda::episode_start(   FeatureMap* new_feature_map,
 int RLCBLambda::episode_step(FeatureMap* new_feature_map, 
                                 IntVect* num_nonzero_in_f, float new_reward, 
 								int forced_action_ind) {
-    if (forced_action_ind != -1) new_reward *= 1000;
+    if (forced_action_ind != -1) new_reward *= rewardRate;
+    if (i_episode_counter >= 9000) f_epsilon = 0.0;
     i_frame_counter++;
 	assert(i_prev_action != -1);
 	double delta = new_reward - v_Q[i_prev_action];	
