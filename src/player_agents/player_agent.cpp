@@ -501,7 +501,8 @@ void PlayerAgent::end_game(void) {
 			 << " frames is " << last_steps_avg << endl;
 		// Write a summary file
 		ofstream file;
-		file.open("run_summary.txt");
+		string filename = prefix + "run_summary.txt"
+		file.open(filename.c_str());
 		file << "Player Agent: " 
 			 << p_osystem->settings().getString("player_agent", true) << endl
 			 << "Game: " << p_game_settings->s_rom_file << endl

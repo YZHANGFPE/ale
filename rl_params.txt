@@ -22,5 +22,5 @@ do_subtract_background = true
 shrink_weights_frq = 0
 shrink_weights_method = linear_shrink
 shrink_weights_const = 1.0
-reward = 100000
-planning_episode = 7999
+reward = 1
+planning_episode = 0
