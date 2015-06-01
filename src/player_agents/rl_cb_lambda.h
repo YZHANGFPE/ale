@@ -254,6 +254,7 @@ class RLCBLambda {
         EleVect* pv_model;
         ofstream myfile;
         int rewardRate;
+        int planning_episode;
         
         
         

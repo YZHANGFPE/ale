@@ -115,6 +115,16 @@ class RAMAgentCB : public PlayerAgent {
 		bool b_end_episode_with_reward;
         SearchAgent* search_agent;
         int planning_episode;
+
+        struct element{
+            FeatureMap curr_fm;
+            IntVect curr_nnif;
+            int reward;
+            int action;
+        };
+        typedef vector< element > EleVect;
+        EleVect* pv_plan;
+        int skip_count;
 };
 
 

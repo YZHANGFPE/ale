@@ -106,6 +106,7 @@ class RAMAgent : public PlayerAgent {
         float f_alpha_multiplier;
         IntVect* pv_subvector_positions;
 		bool b_end_episode_with_reward;
+
 };
 
 #endif

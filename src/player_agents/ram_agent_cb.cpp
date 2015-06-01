@@ -47,6 +47,7 @@ RAMAgentCB::RAMAgentCB(GameSettings* _game_settings, OSystem* _osystem) :
 											"end_episode_with_reward", true);
     search_agent = new SearchAgent(_game_settings, _osystem);
     planning_episode = p_osystem->settings().getInt("planning_episode");
+    pv_plan = new EleVect();
 }
 
 RAMAgentCB::~RAMAgentCB() {
@@ -55,6 +56,7 @@ RAMAgentCB::~RAMAgentCB() {
     delete pv_num_nonzero_in_f;
     delete pv_tmp_fv_first_part;
     delete pv_subvector_positions;
+    delete pv_plan;
 
 }
         
@@ -99,6 +101,20 @@ Action RAMAgentCB::agent_step(const IntMatrix* screen_matrix,
 	} 
     else if (i_episode_counter == planning_episode){
 
+        // record planning procedure
+        
+        if (skip_count%2 == 0){
+            element e;
+            e.curr_fm = *pv_curr_feature_map;
+            e.curr_nnif = *pv_num_nonzero_in_f;
+            e.action = search_agent->action_idx;
+            e.reward = f_curr_reward;
+            pv_plan->push_back(e);
+            cout << "Plan size: " << pv_plan->size() << endl;
+        }
+        skip_count++;
+        
+
         next_action_ind = p_cb_lambda_solver->episode_step(
                                                    pv_curr_feature_map, 
                                                    pv_num_nonzero_in_f,
@@ -131,6 +147,22 @@ Action RAMAgentCB::on_start_of_game(void) {
 		next_action_ind = p_cb_lambda_solver->episode_start(
 									pv_curr_feature_map, pv_num_nonzero_in_f);
 	}
+    int replay_freq = (i_episode_counter/1000 + 1) * 50;
+    if (i_episode_counter % replay_freq == 0 && i_episode_counter != planning_episode){
+        cout << "Replay planning episode" <<endl;
+        for(int i = 0; i < pv_plan->size();i++){
+            element e = pv_plan->at(i);
+            p_cb_lambda_solver->episode_step(
+                                               &e.curr_fm, 
+                                               &e.curr_nnif,
+                                               e.reward,
+                                               e.action);
+            
+        }
+        p_cb_lambda_solver->episode_start(
+                                    pv_curr_feature_map, pv_num_nonzero_in_f);
+    }
+    skip_count = 0;
     return  (*(p_game_settings->pv_possible_actions))[next_action_ind];
 
 }

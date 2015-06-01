@@ -153,6 +153,7 @@ int RLSarsaLambda::episode_start(   FeatureMap* new_feature_map,
 int RLSarsaLambda::episode_step(FeatureMap* new_feature_map, 
                                 IntVect* num_nonzero_in_f, float new_reward, 
 								int forced_action_ind) {
+    if (i_episode_counter >= 9000) f_epsilon = 0.0;
     i_frame_counter++;
 	assert(i_prev_action != -1);
 	double delta = new_reward - v_Q[i_prev_action];	

@@ -112,6 +112,7 @@ RLCBLambda::RLCBLambda(   OSystem* _osystem, int feature_vec_size,
     myfile << "Episode Largest_weight Smallest_weight Largest_trace Smallest_trace Number_of_non_initial_weight\n";
 
     rewardRate = _osystem->settings().getInt("reward");
+    planning_episode = p_osystem->settings().getInt("planning_episode");
 }
 
 /* *********************************************************************
@@ -169,7 +170,7 @@ int RLCBLambda::episode_start(   FeatureMap* new_feature_map,
 int RLCBLambda::episode_step(FeatureMap* new_feature_map, 
                                 IntVect* num_nonzero_in_f, float new_reward, 
 								int forced_action_ind) {
-    if (forced_action_ind != -1) new_reward *= rewardRate;
+    //if (forced_action_ind != -1) new_reward *= rewardRate;
     if (i_episode_counter >= 9000) f_epsilon = 0.0;
     i_frame_counter++;
 	assert(i_prev_action != -1);
@@ -270,7 +271,17 @@ void RLCBLambda::episode_end(float reward, float value_of_final_state) {
         export_weights(filename.str());
         cout << "done." << endl;
     }
+
+    
+    if ( i_episode_counter - 1  == planning_episode ){
+        float init_weight = (float) 1/i_feature_vec_size;
+        for (unsigned int i = 0; i < pv_weights->size(); i++) {
+            if ((*pv_weights)[i] != init_weight) (*pv_weights)[i] *= rewardRate;                
+        }
+    }
+
     print_largest_weight();
+
     delete pv_prev_features_map;
     delete pv_num_nonzero_in_f_prev;
     delete pv_model;
